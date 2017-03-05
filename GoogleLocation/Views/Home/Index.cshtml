@@ -1,1 +1,143 @@
-﻿<h2>Welcome to ASP.NET MVC @ViewData["Version"] on @ViewData["Runtime"]!</h2>
+﻿@using GoogleLocation.Models
+@model IList<OfficeLocation>
+                
+
+<div class="row">
+	<div class="col-sm-4">
+		<button onclick="laddaKartaMedOffices()">1. Ladda karta</button>
+	</div>
+	<div class="col-sm-4">
+		<button onclick="positionPerIP()">2a. Position per IP (server)</button>
+	</div>
+	<div class="col-sm-4">
+		<button onclick="positionPerGeoLocation()">2b. Position per Geolocation (browser)</button>
+	</div>
+</div>
+<div id="map_canvas" style="width: 100%; height: 550px; margin-bottom:2px;">
+</div>
+
+
+@section scripts {
+
+<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp" type="text/javascript"></script>
+
+<script type='text/javascript'>
+	var geocoder;
+	var map;
+  	var marker = null;
+	var retryCount = 0;
+	
+    //$(document).ready(function() {
+    //    initialize();
+    //});
+
+	function laddaKartaMedOffices() {
+		if (GBrowserIsCompatible()) {
+            map = new GMap2(document.getElementById('map_canvas'));
+            var bounds = new GLatLngBounds();
+	
+			@foreach(OfficeLocation office in Model) {
+				<text>@("p"+office.OfficeLocationID)=new GLatLng(@office.LocationX,@office.LocationY); @("m"+office.OfficeLocationID)=new GMarker(@("p"+office.OfficeLocationID));</text>
+				<text>GEvent.addListener(@("m"+office.OfficeLocationID),'click',function() {@("m"+office.OfficeLocationID).openInfoWindowHtml('<html><table><tr><td>Kontor:&nbsp;</td><td>@office.Name</td></tr></table></html>');});</text>
+				<text>map.addOverlay(@("m"+office.OfficeLocationID));bounds.extend(@("p"+office.OfficeLocationID));</text>
+			}
+	
+            map.setCenter(bounds.getCenter(), map.getBoundsZoomLevel(bounds));
+            map.setUIToDefault();
+        }
+	}
+	
+	function positionPerIP() {
+        if (GBrowserIsCompatible()) {
+			latitude = @ViewBag.ClientLocation.LocationX;
+			longitude = @ViewBag.ClientLocation.LocationY;
+			name = '@ViewBag.ClientLocation.Name';
+			SetHomeMarker(latitude, longitude, name);
+        }
+    }
+	
+    function positionPerGeoLocation() {
+        if (GBrowserIsCompatible()) {
+			geocoder = new google.maps.Geocoder();
+		    if (navigator.geolocation)
+		    {
+		      navigator.geolocation.getCurrentPosition(geoOk,geoNotOk);
+		    }
+		    else
+		    {
+		      updatePos();
+		    }
+        }
+    }
+
+	function updatePos()
+	{
+		if(retryCount<2) {
+		    if (navigator.geolocation)
+		    {
+		        navigator.geolocation.getCurrentPosition(geoOk,geoNotOk);
+		    }
+		    else
+		    {
+				retryCount++;
+		        setTimeout(function() {
+		            updatePos();
+		        }, 5000);
+		    }
+		}
+	}
+
+	function geoOk(position)
+  	{
+		latitude = position.coords.latitude;
+		longitude = position.coords.longitude;
+		name = "Min position";
+		SetHomeMarker(latitude, longitude, name);
+  	}
+
+	function SetHomeMarker(lat, lng, name) {
+		var newPos = new GLatLng(lat, lng);
+
+		var new_icon = new GIcon()  
+		new_icon.image = "http://maps.google.com/mapfiles/ms/micons/arrow.png"  
+		new_icon.size = new GSize(16,16)  
+		new_icon.iconAnchor = new GPoint(8,9)  
+		new_icon.infoWindowAnchor = new GPoint(7,7) 
+	
+		var myPositionIcon = {
+			title: "Position",
+			icon: new_icon
+		};
+		marker = new GMarker(newPos, myPositionIcon);
+		map.addOverlay(marker);
+		marker.openInfoWindowHtml('<h2>'+name+'</h2>');
+	
+		map.setCenter(newPos, 10);
+	}
+
+	function geoNotOk(error)
+	{
+	    switch(error.code) 
+	    {
+	        case error.PERMISSION_DENIED:
+	            alert("Denied by browser");
+	            break;
+	        case error.POSITION_UNAVAILABLE:
+	            //alert("Position unavailable");
+				setTimeout(function() {
+			        updatePos();
+			    }, 5000);
+	            break;
+	        case error.TIMEOUT:
+	            alert("Timeout");
+				setTimeout(function() {
+			        updatePos();
+			    }, 5000);
+	            break;
+	        case error.UNKNOWN_ERROR:
+	            alert("Off");
+	            break;
+	    }
+	}
+</script>
+}

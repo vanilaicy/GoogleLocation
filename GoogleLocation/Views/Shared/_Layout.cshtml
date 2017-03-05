@@ -2,8 +2,26 @@
 <html>
 <head>
     <title>@ViewBag.Title</title>
+	<meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet"/>
+    <link href="~/Content/bootstrap-theme.min.css" rel="stylesheet"/>
 </head>
 <body>
-	@RenderBody()
+	<header class="jumbotron text-center">
+		<h1>Lite Google Tester</h1>
+    </header>
+    <div id="body">
+        <section class="container">
+			@RenderBody()
+        </section>
+    </div>
+    <footer>
+        <p>&copy; 2017 - Katharina</p>
+    </footer>
+		
+	<script type="text/javascript" src="~/Scripts/jquery-3.1.1.min.js"></script>
+	<script type="text/javascript" src="~/Scripts/bootstrap.min.js"></script>
+    @RenderSection("scripts", false)
 </body>
 </html>

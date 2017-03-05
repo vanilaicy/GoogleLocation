@@ -1,10 +1,12 @@
 ﻿using System;
-namespace GoogleLocation
+namespace GoogleLocation.Models
 {
 	public class OfficeLocation
 	{
-		public OfficeLocation()
-		{
-		}
+		public int OfficeLocationID { get; set; }
+		public string Name { get; set; }
+		public double LocationX { get; set; }
+		public double LocationY { get; set; }
+
 	}
 }
